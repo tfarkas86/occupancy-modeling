@@ -1,0 +1,32 @@
+model {
+# model structure
+# define likelihoods
+
+for(j in 1:sites) {
+
+  z[j] ~ dbern(psi[j])
+  logit(psi[j]) <- a0 + a_urban*urban[j] + a_wetland*wetland[j] + a_rabbit*rabbit[j]
+
+  for (k in 1:survs) {
+
+    y[j,k] ~ dbern(pz[j,k])
+    pz[j,k] <- z[j] * p[j,k]
+    logit(p[j,k]) <- b0 + b_urban*urban[j] + b_wetland*wetland[j] + 
+                     b_rabbit*rabbit[j] + b_rain*rain[j,k]
+
+  }
+}
+
+# define priors
+
+a0 ~ dnorm(0, 0.001)
+a_urban ~ dnorm(0, 0.001)
+a_wetland ~ dnorm(0, 0.001)
+a_rabbit ~ dnorm(0, 0.001)
+b0 ~ dnorm(0, 0.001)
+b_urban ~ dnorm(0, 0.001)
+b_wetland ~ dnorm(0, 0.001)
+b_rabbit ~ dnorm(0, 0.001)
+b_rain ~ dnorm(0, 0.001)
+
+    }

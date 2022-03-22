@@ -1,0 +1,64 @@
+model{
+        ##---------------------------------------------------------------------------------#
+        ##***               Q3. WRITE THE JAGS CODE FOR THE LIKELIHOOD                  ***#
+          ###########################
+          ##Ecological process model
+          ###########################
+            ##loop through the sites
+              for(i in 1:n.sites){
+                ##Occupancy state in the first year
+                  
+                  z[i,1] ~ dbern(psi[i,1])
+                  logit(psi[i,1]) <- a0 + a_elev*elev[i]
+
+
+                ##occupancy state in all other years
+                ##using a loop through years 2 to 6
+                ##phi is the survival rate
+                ##gamma is the colonization rate
+                  for(t in 2:n.years){
+                  
+                    z[i,t] ~ dbern(z[i,t-1]*phi[i,t-1] + (1 - z[i,t-1])*gam[i,t-1])
+                    logit(phi[i,t-1]) <- b0 + b_fire*fire[i,t]
+                    logit(gam[i,t-1]) <- c0 + c_fire*fire[i,t]
+
+                  }
+              }
+
+          ############################
+          ##Observation process model
+          ############################
+
+            ##loop through the sites
+            for(i in 1:n.sites){
+              ##loop through the replicate surveys
+              
+                ##loop through the years
+                for(t in 1:n.years){
+
+                  zp[i,t] <- z[i,t] * p[t] 
+                  
+                    for(j in 1:n.reps){                  
+                    y[i,j,t] ~ dbern(zp[i,t])
+                 
+                }
+              }
+            }
+##PUT ALL PRIORS OTHER THAN P OUTSIDE THE LOOP
+
+a0 ~ dnorm(0, .001)
+a_elev ~ dnorm(0, .001)
+b0 ~ dnorm(0, .001)
+c0 ~ dnorm(0, .001)
+b_fire ~ dnorm(0, .001)
+c_fire ~ dnorm(0, .001)
+
+      for(t in 1:n.years){
+      
+        ##PUT PRIOR FOR P IN THE LOOP
+
+p[t] ~ dunif(0,1)
+
+      }
+    ##------------------------------------------------##
+  }

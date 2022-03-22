@@ -1,0 +1,52 @@
+model{
+      #########################
+      ## Define the likelihood
+      #########################
+        ##loop through all of the sites (N)
+          for(j in 1:N){
+            ########################################################
+            ## State process (i.e., the true occupancy of the site)
+            ########################################################
+              #---------------------------------#
+              z[j] ~ dbern(psi)
+              #---------------------------------#
+              
+              ##Caluclate z * p.  In JAGS this can't be done
+              ##inside the dbern statement below
+                          #---------------------#
+                p.z[j] <- p * z[j]
+                          #---------------------#
+      
+            #######################
+            ## Observation process
+            #######################
+              ##loop through the repeat surveys (T)
+                for(k in 1:T){
+                  #-----------------------------------#
+                  y[j,k] ~ dbern(p.z[j])
+                  #-----------------------------------#
+                }##close k loop
+        }##close the j loop
+
+      ######################
+      ## Define the priors
+      ######################
+        #-----------------------------#
+        psi ~ dunif(0,1)
+        #-----------------------------#
+
+        #---------------------------#
+        p ~ dunif(0,1)
+        #---------------------------#
+
+      #########################################################
+      ## Derived quantities
+      ## derived in the JAGS model so that we get a posterior
+      ## distribution for these quantities
+      ##########################################################
+        ##Estimated number of occupied sites
+          #-----------------------------------------------#
+          n <- sum(z[])
+          #-----------------------------------------------#
+    
+    }
